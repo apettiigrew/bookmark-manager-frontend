@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
-import QueryProvider from "@/components/QueryProvider";
+import QueryProvider from "@/providers/QueryProvider";
 
 const manrope = Manrope({
   variable: "--font-manrope",

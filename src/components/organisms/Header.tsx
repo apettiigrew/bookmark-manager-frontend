@@ -1,14 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
 import { SearchBar } from "@/components/SearchBar";
 import { Plus } from "lucide-react";
 
 interface HeaderProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
+  onOpenAddModal: () => void;
 }
 
-export function Header({ searchValue, onSearchChange }: HeaderProps) {
+export function Header({ searchValue, onSearchChange, onOpenAddModal }: HeaderProps) {
   return (
     <header className="flex items-center gap-300 px-400 py-200 bg-neutral-0 border-b border-neutral-300 h-16 shrink-0">
       {/* Logo */}
@@ -33,7 +34,7 @@ export function Header({ searchValue, onSearchChange }: HeaderProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-200 shrink-0">
-        <Button variant="default" className="gap-100">
+        <Button variant="default" className="gap-100" onClick={onOpenAddModal}>
           <Plus size={14} />
           <span className="hidden sm:inline">Add Bookmark</span>
         </Button>

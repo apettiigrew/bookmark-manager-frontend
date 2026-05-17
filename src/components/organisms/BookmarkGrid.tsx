@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/ui/button";
 import { BookmarkCard } from "@/components/BookmarkCard";
 import { ArrowUpDown } from "lucide-react";
 import type { Bookmark } from "@/lib/mockData";
