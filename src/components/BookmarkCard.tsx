@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Archive, ArchiveX, ExternalLink, Pencil, Pin, Trash2 } from "lucide-react";
 import { Badge } from "@/ui/badge";
 import { formatDate } from "@/lib/formatDate";
-import { useDeleteBookmark, useToggleArchive, useTogglePin } from "@/lib/api/bookmarks.mutations";
+import { useToggleTrash, useToggleArchive, useTogglePin } from "@/lib/api/bookmarks.mutations";
 import type { Bookmark } from "@/lib/mockData";
 import { EditBookmarkModal } from "@/components/EditBookmarkModal";
 
@@ -17,7 +17,7 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
   const { id, title, url, description, favicon, tags, createdAt, isPinned, isArchived } = bookmark;
   const [editOpen, setEditOpen] = useState(false);
 
-  const { mutate: deleteBookmark } = useDeleteBookmark();
+  const { mutate: toggleTrash } = useToggleTrash();
   const { mutate: togglePin } = useTogglePin();
   const { mutate: toggleArchive } = useToggleArchive();
 
@@ -72,8 +72,8 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
               {isArchived ? <ArchiveX size={14} /> : <Archive size={14} />}
             </button>
             <button
-              onClick={() => deleteBookmark(id)}
-              aria-label="Delete bookmark"
+              onClick={() => toggleTrash(id)}
+              aria-label="Move to trash"
               className="flex items-center justify-center size-7 rounded-6 cursor-pointer text-neutral-500 hover:bg-red-600/10 hover:text-red-600 transition-colors"
             >
               <Trash2 size={14} />
