@@ -67,6 +67,25 @@ export function useToggleArchive() {
   });
 }
 
+export function useToggleTrash() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiPatch<Bookmark>(`/bookmarks/${id}/trash`, {}),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: bookmarkKeys.all() });
+      qc.invalidateQueries({ queryKey: bookmarkKeys.detail(id) });
+    },
+  });
+}
+
+export function useEmptyTrash() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiDelete<void>("/bookmarks/trash"),
+    onSuccess: () => qc.invalidateQueries({ queryKey: bookmarkKeys.all() }),
+  });
+}
+
 export function useRecordVisit() {
   const qc = useQueryClient();
   return useMutation({
