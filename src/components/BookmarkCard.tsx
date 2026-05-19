@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ExternalLink, Pencil, Pin, Trash2 } from "lucide-react";
+import { Archive, ArchiveX, ExternalLink, Pencil, Pin, Trash2 } from "lucide-react";
 import { Badge } from "@/ui/badge";
 import { formatDate } from "@/lib/formatDate";
-import { useDeleteBookmark, useTogglePin } from "@/lib/api/bookmarks.mutations";
+import { useDeleteBookmark, useToggleArchive, useTogglePin } from "@/lib/api/bookmarks.mutations";
 import type { Bookmark } from "@/lib/mockData";
 import { EditBookmarkModal } from "@/components/EditBookmarkModal";
 
@@ -14,11 +14,12 @@ interface BookmarkCardProps {
 }
 
 export function BookmarkCard({ bookmark }: BookmarkCardProps) {
-  const { id, title, url, description, favicon, tags, createdAt, isPinned } = bookmark;
+  const { id, title, url, description, favicon, tags, createdAt, isPinned, isArchived } = bookmark;
   const [editOpen, setEditOpen] = useState(false);
 
   const { mutate: deleteBookmark } = useDeleteBookmark();
   const { mutate: togglePin } = useTogglePin();
+  const { mutate: toggleArchive } = useToggleArchive();
 
   const hostname = (() => {
     try { return new URL(url).hostname.replace("www.", ""); }
@@ -62,6 +63,13 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
               className="flex items-center justify-center size-7 rounded-6 cursor-pointer text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
             >
               <Pencil size={14} />
+            </button>
+            <button
+              onClick={() => toggleArchive(id)}
+              aria-label={isArchived ? "Unarchive bookmark" : "Archive bookmark"}
+              className={`flex items-center justify-center size-7 rounded-6 cursor-pointer transition-colors ${isArchived ? "text-teal-700 hover:bg-neutral-100" : "text-neutral-500 hover:bg-neutral-100 hover:text-teal-700"}`}
+            >
+              {isArchived ? <ArchiveX size={14} /> : <Archive size={14} />}
             </button>
             <button
               onClick={() => deleteBookmark(id)}
