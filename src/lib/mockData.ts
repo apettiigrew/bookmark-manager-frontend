@@ -13,6 +13,7 @@ export interface Bookmark {
   lastVisited: string | null;
   isPinned: boolean;
   isArchived: boolean;
+  isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
   tags: BookmarkTag[];

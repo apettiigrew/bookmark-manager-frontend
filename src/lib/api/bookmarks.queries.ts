@@ -7,6 +7,7 @@ export interface BookmarkListParams {
   tags?: string[];
   archived?: boolean;
   pinned?: boolean;
+  deleted?: boolean;
   sortBy?: "createdAt" | "lastVisited" | "viewCount";
   order?: "asc" | "desc";
   page?: number;
@@ -31,6 +32,7 @@ function buildQueryString(params: BookmarkListParams): string {
   if (params.tags?.length)             p.set("tags",     params.tags.join(","));
   if (params.archived !== undefined)   p.set("archived", String(params.archived));
   if (params.pinned   !== undefined)   p.set("pinned",   String(params.pinned));
+  if (params.deleted  !== undefined)   p.set("deleted",  String(params.deleted));
   if (params.sortBy)                   p.set("sortBy",   params.sortBy);
   if (params.order)                    p.set("order",    params.order);
   if (params.page)                     p.set("page",     String(params.page));

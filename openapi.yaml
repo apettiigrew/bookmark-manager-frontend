@@ -44,6 +44,11 @@ paths:
           description: Return pinned bookmarks only
           schema:
             type: boolean
+        - name: deleted
+          in: query
+          description: Return soft-deleted (trashed) bookmarks only
+          schema:
+            type: boolean
         - name: sortBy
           in: query
           description: Field to sort by
@@ -211,6 +216,32 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /bookmarks/{id}/trash:
+    patch:
+      tags: [bookmarks]
+      summary: Toggle trash (soft-delete) status
+      operationId: toggleTrash
+      parameters:
+        - $ref: "#/components/parameters/bookmarkId"
+      responses:
+        "200":
+          description: Bookmark with updated isDeleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /bookmarks/trash:
+    delete:
+      tags: [bookmarks]
+      summary: Permanently delete all trashed bookmarks (empty trash)
+      operationId: emptyTrash
+      responses:
+        "204":
+          description: All trashed bookmarks permanently deleted
+
   /bookmarks/{id}/visit:
     post:
       tags: [bookmarks]
@@ -299,6 +330,9 @@ components:
         isArchived:
           type: boolean
           example: false
+        isDeleted:
+          type: boolean
+          example: false
         createdAt:
           type: string
           format: date-time
@@ -318,6 +352,7 @@ components:
         - viewCount
         - isPinned
         - isArchived
+        - isDeleted
         - createdAt
         - updatedAt
         - tags
