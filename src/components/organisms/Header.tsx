@@ -34,8 +34,8 @@ export function Header({ searchValue, onSearchChange, onOpenAddModal }: HeaderPr
 
       {/* Actions */}
       <div className="flex items-center gap-200 shrink-0">
-        <Button variant="default" className="gap-100" onClick={onOpenAddModal}>
-          <Plus size={14} />
+        <Button variant="default" className="gap-100 text-white" onClick={onOpenAddModal}>
+          <Plus size={14} className="text-white" />
           <span className="hidden sm:inline">Add Bookmark</span>
         </Button>
         <Avatar>

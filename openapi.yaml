@@ -1,0 +1,457 @@
+openapi: 3.0.3
+info:
+  title: Bookmark Manager API
+  description: REST API for managing bookmarks with tagging, search, and filtering
+  version: "1.0"
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: bookmarks
+    description: Bookmark CRUD, filtering, and actions
+  - name: tags
+    description: Tag listing
+
+paths:
+  /bookmarks:
+    get:
+      tags: [bookmarks]
+      summary: List bookmarks with search, filter, sort, and pagination
+      operationId: listBookmarks
+      parameters:
+        - name: search
+          in: query
+          description: Case-insensitive partial title match
+          schema:
+            type: string
+          example: github
+        - name: tags
+          in: query
+          description: Comma-separated tag names (OR semantics)
+          schema:
+            type: string
+          example: "react,ts"
+        - name: archived
+          in: query
+          description: Return archived bookmarks
+          schema:
+            type: boolean
+            default: false
+        - name: pinned
+          in: query
+          description: Return pinned bookmarks only
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [createdAt, lastVisited, viewCount]
+            default: createdAt
+        - name: order
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          description: Pagination page (1-based)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Paginated list of bookmarks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookmarkListResponse"
+
+    post:
+      tags: [bookmarks]
+      summary: Create a new bookmark
+      operationId: createBookmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookmarkDto"
+            example:
+              title: GitHub
+              url: https://github.com
+              description: Where the world builds software
+              tags: [git, open-source]
+      responses:
+        "201":
+          description: Bookmark created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /bookmarks/tags:
+    get:
+      tags: [tags]
+      summary: List all tags with bookmark counts
+      operationId: listTags
+      responses:
+        "200":
+          description: Array of tags with bookmark counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TagWithCount"
+
+  /bookmarks/{id}:
+    get:
+      tags: [bookmarks]
+      summary: Get a single bookmark by ID
+      operationId: getBookmark
+      parameters:
+        - $ref: "#/components/parameters/bookmarkId"
+      responses:
+        "200":
+          description: Bookmark found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags: [bookmarks]
+      summary: Update a bookmark (partial)
+      operationId: updateBookmark
+      parameters:
+        - $ref: "#/components/parameters/bookmarkId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBookmarkDto"
+            example:
+              title: GitHub — Updated
+              tags: [git, devtools]
+      responses:
+        "200":
+          description: Bookmark updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [bookmarks]
+      summary: Permanently delete a bookmark
+      operationId: deleteBookmark
+      parameters:
+        - $ref: "#/components/parameters/bookmarkId"
+      responses:
+        "204":
+          description: Bookmark deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /bookmarks/{id}/pin:
+    patch:
+      tags: [bookmarks]
+      summary: Toggle pin status
+      operationId: togglePin
+      parameters:
+        - $ref: "#/components/parameters/bookmarkId"
+      responses:
+        "200":
+          description: Bookmark with updated isPinned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /bookmarks/{id}/archive:
+    patch:
+      tags: [bookmarks]
+      summary: Toggle archive status
+      operationId: toggleArchive
+      parameters:
+        - $ref: "#/components/parameters/bookmarkId"
+      responses:
+        "200":
+          description: Bookmark with updated isArchived
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /bookmarks/{id}/visit:
+    post:
+      tags: [bookmarks]
+      summary: Record a visit (increment viewCount, set lastVisited)
+      operationId: recordVisit
+      parameters:
+        - $ref: "#/components/parameters/bookmarkId"
+      responses:
+        "201":
+          description: Bookmark with updated viewCount and lastVisited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  parameters:
+    bookmarkId:
+      name: id
+      in: path
+      required: true
+      description: CUID bookmark identifier
+      schema:
+        type: string
+      example: clxyz1234567890abcdef
+
+  schemas:
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          description: CUID
+          example: clxyz1234567890abcdef
+        name:
+          type: string
+          example: react
+      required: [id, name]
+
+    TagWithCount:
+      allOf:
+        - $ref: "#/components/schemas/Tag"
+        - type: object
+          properties:
+            bookmarkCount:
+              type: integer
+              example: 12
+          required: [bookmarkCount]
+
+    Bookmark:
+      type: object
+      properties:
+        id:
+          type: string
+          description: CUID
+          example: clxyz1234567890abcdef
+        title:
+          type: string
+          example: GitHub
+        description:
+          type: string
+          nullable: true
+          example: Where the world builds software
+        url:
+          type: string
+          format: uri
+          example: https://github.com
+        favicon:
+          type: string
+          nullable: true
+          format: uri
+          example: https://www.google.com/s2/favicons?domain=github.com&sz=64
+        viewCount:
+          type: integer
+          example: 5
+        lastVisited:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-05-12T10:30:00.000Z"
+        isPinned:
+          type: boolean
+          example: false
+        isArchived:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-05-01T09:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-05-12T10:30:00.000Z"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+      required:
+        - id
+        - title
+        - url
+        - viewCount
+        - isPinned
+        - isArchived
+        - createdAt
+        - updatedAt
+        - tags
+
+    CreateBookmarkDto:
+      type: object
+      required: [title, url]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: GitHub
+        description:
+          type: string
+          maxLength: 1000
+          example: Where the world builds software
+        url:
+          type: string
+          format: uri
+          maxLength: 2048
+          example: https://github.com
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          maxItems: 20
+          example: [git, open-source]
+
+    UpdateBookmarkDto:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: GitHub — Updated
+        description:
+          type: string
+          maxLength: 1000
+        url:
+          type: string
+          format: uri
+          maxLength: 2048
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          maxItems: 20
+          description: Fully replaces the existing tag set
+
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 84
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        totalPages:
+          type: integer
+          example: 5
+      required: [total, page, limit, totalPages]
+
+    BookmarkListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Bookmark"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+      required: [data, meta]
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: Bookmark clxyz1234567890abcdef not found
+        error:
+          type: string
+          example: Not Found
+      required: [statusCode, message, error]
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: array
+          items:
+            type: string
+          example:
+            - "url must be a URL address"
+            - "title should not be empty"
+        error:
+          type: string
+          example: Bad Request
+      required: [statusCode, message, error]
+
+  responses:
+    NotFound:
+      description: Bookmark not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            statusCode: 404
+            message: Bookmark clxyz1234567890abcdef not found
+            error: Not Found
+
+    ValidationError:
+      description: Request body failed validation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+          example:
+            statusCode: 400
+            message:
+              - "url must be a URL address"
+              - "title should not be empty"
+            error: Bad Request

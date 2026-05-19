@@ -48,25 +48,25 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
             <p className="text-preset-4 text-neutral-900 truncate">{title}</p>
             <p className="text-preset-5 text-neutral-500 truncate">{hostname}</p>
           </div>
-          <div className="flex items-center gap-050 shrink-0">
+          <div className="flex items-center gap-025 shrink-0">
             <button
               onClick={() => togglePin(id)}
               aria-label={isPinned ? "Unpin bookmark" : "Pin bookmark"}
-              className="text-neutral-500 hover:text-teal-700 transition-colors"
+              className={`flex items-center justify-center size-7 rounded-6 cursor-pointer transition-colors ${isPinned ? "text-teal-700 hover:bg-neutral-100" : "text-neutral-500 hover:bg-neutral-100 hover:text-teal-700"}`}
             >
-              <Pin size={14} className={isPinned ? "fill-teal-700 text-teal-700" : ""} />
+              <Pin size={14} className={isPinned ? "fill-teal-700" : ""} />
             </button>
             <button
               onClick={() => setEditOpen(true)}
               aria-label="Edit bookmark"
-              className="text-neutral-500 hover:text-neutral-900 transition-colors"
+              className="flex items-center justify-center size-7 rounded-6 cursor-pointer text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
             >
               <Pencil size={14} />
             </button>
             <button
               onClick={() => deleteBookmark(id)}
               aria-label="Delete bookmark"
-              className="text-neutral-500 hover:text-red-600 transition-colors"
+              className="flex items-center justify-center size-7 rounded-6 cursor-pointer text-neutral-500 hover:bg-red-600/10 hover:text-red-600 transition-colors"
             >
               <Trash2 size={14} />
             </button>
@@ -74,7 +74,7 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-500 hover:text-neutral-900 transition-colors"
+              className="flex items-center justify-center size-7 rounded-6 cursor-pointer text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
               aria-label={`Open ${title}`}
             >
               <ExternalLink size={14} />
