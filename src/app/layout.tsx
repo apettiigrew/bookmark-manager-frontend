@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} h-full`}>
+    <html lang="en" className={`${manrope.variable} h-full`} suppressHydrationWarning>
       <body className="h-full antialiased">
         <QueryProvider>{children}</QueryProvider>
       </body>
